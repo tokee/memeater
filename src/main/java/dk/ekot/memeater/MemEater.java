@@ -10,9 +10,13 @@ import java.util.Random;
  * random to awoid the memory being swapped out.
  */
 public class MemEater {
-    public static final long DELAY = 20; // ms
+    public static final long DEFAULT_DELAY = 20; // ms
+    public static final long DEFAULT_UPDATES = 1; // updates / MB
 
-    public MemEater(long delay) {
+    public MemEater(long delay, long updates) {
+        System.out.println(String.format(
+                "Allocating full memory for max heap %d MB",
+                Runtime.getRuntime().maxMemory()/1048576));
         List<long[]> blocks = new ArrayList<>();
         try {
             //noinspection InfiniteLoopStatement
@@ -20,14 +24,17 @@ public class MemEater {
                 blocks.add(new long[1048576 / 8]); // 1MB
             }
         } catch (OutOfMemoryError e) {
-            System.out.println("Allocated " + blocks.size() + "MB. " +
-                               "Switching to active mode with random updates every " + DELAY + "ms.");
+            System.out.println(String.format(
+                    "Allocated %d MB. Switching to %d random updates per MB every %s ms",
+                    blocks.size(), delay, updates));
         }
 
         Random random = new Random();
         while (true) {
             for (long[] block: blocks) {
-                block[((int) (random.nextDouble() * block.length))]++;
+                for (long update = 0 ; update < updates ; update++) {
+                    block[((int) (random.nextDouble() * block.length))]++;
+                }
             }
             try {
                 Thread.sleep(delay);
@@ -39,6 +46,7 @@ public class MemEater {
     }
 
     public static void main(String[] args) {
-        new MemEater(DELAY);
+        new MemEater(args.length > 0 ? Long.parseLong(args[0]) : DEFAULT_DELAY,
+                     args.length > 1 ? Long.parseLong(args[1]) : DEFAULT_UPDATES);
     }
 }
