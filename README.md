@@ -20,7 +20,9 @@ Build & Usage
 
 `mvn package`
 
-`java -cp Mem
+`java -Xmx500m  -jar target/memeater-0.1-SNAPSHOT.jar`
+
+`java -Xmx2g  -jar target/memeater-0.1-SNAPSHOT.jar`
 
 
 
